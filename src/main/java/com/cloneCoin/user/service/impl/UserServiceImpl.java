@@ -9,11 +9,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -22,17 +26,32 @@ public class UserServiceImpl implements UserService {
     BCryptPasswordEncoder passwordEncoder;
     KafkaProducer kafkaProducer;
 
+    Environment env;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        UserEntity userEntity = userRepository.findByUsername(username);
+        log.info("loadUserByUsername : {}", userEntity);
+        if(userEntity == null)
+            throw new UsernameNotFoundException(username);
+
+        return new User(userEntity.getUsername(),
+                userEntity.getEncryptedPassword(),
+                true, true,
+                true, true,
+                new ArrayList<>());
+    }
+
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, KafkaProducer kafkaProducer) {
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, KafkaProducer kafkaProducer, Environment env) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.env = env;
         this.kafkaProducer = kafkaProducer;
     }
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        userDto.setUserId(UUID.randomUUID().toString());
-
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
         UserEntity userEntity = mapper.map(userDto, UserEntity.class);
@@ -40,18 +59,38 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(userEntity);
 
-        UserDto returnUserDto = mapper.map(userEntity, UserDto.class);
+        UserDto newUser = mapper.map(userEntity, UserDto.class);
 
         // kafka 로 user created 생성 produce 작업 필요
-        kafkaProducer.send("quickstart-events", userDto);
+        kafkaProducer.send("quickstart-events", newUser);
         log.info("message sent by userServiceImpl" );
 
-        return returnUserDto;
+        return newUser;
     }
 
     @Override
-    public UserDto getUserByUserId(String userId) {
-        UserEntity userEntity = userRepository.findByUserId(userId);
+    public UserDto getUserById(Long id) {
+        Optional<UserEntity> userEntity = userRepository.findById(id);
+
+        if(userEntity == null) {
+            throw new UsernameNotFoundException("user not found");
+        }
+
+        UserDto userDto = new ModelMapper().map(userEntity, UserDto.class);
+
+        return userDto;
+    }
+
+
+    @Override
+    public Iterable<UserEntity> getUserByAll() {
+        return userRepository.findAll();
+    }
+
+
+    @Override
+    public UserDto getUserDetailsByUsername(String username) {
+        UserEntity userEntity = userRepository.findByUsername(username);
 
         if(userEntity == null) {
             throw new UsernameNotFoundException("user not found");
@@ -63,7 +102,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Iterable<UserEntity> getUserByAll() {
-        return userRepository.findAll();
+    public UserDto getUserDetailsByEmail(String email) {
+        UserEntity userEntity = userRepository.findByEmail(email);
+
+        if (userEntity == null)
+            throw new UsernameNotFoundException(email);
+
+        UserDto userDto = new ModelMapper().map(userEntity, UserDto.class);
+        return userDto;
     }
 }

@@ -2,9 +2,15 @@ package com.cloneCoin.user.service;
 
 import com.cloneCoin.user.dto.UserDto;
 import com.cloneCoin.user.jpa.UserEntity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
-public interface UserService {
+public interface UserService extends UserDetailsService {
     UserDto createUser(UserDto userDto);
-    UserDto getUserByUserId(String userId);
+
+    UserDto getUserById(Long userId);
     Iterable<UserEntity> getUserByAll();
+
+    UserDto getUserDetailsByUsername(String username);
+    UserDto getUserDetailsByEmail(String email);
+
 }

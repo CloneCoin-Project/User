@@ -12,16 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
 
 @RestController
-@RequestMapping("/user/")
+@RequestMapping("/")
 public class UserController {
     private Environment env;
     private UserService userService;
@@ -57,8 +55,8 @@ public class UserController {
     }
 
     @GetMapping("/users/{userId}")
-    public ResponseEntity<ResponseUser> getUser(@PathVariable("userId") String userId) {
-        UserDto userDto = userService.getUserByUserId(userId);
+    public ResponseEntity<ResponseUser> getUser(@PathVariable("userId") Long id) {
+        UserDto userDto = userService.getUserById(id);
         ResponseUser returnValue = new ModelMapper().map(userDto, ResponseUser.class);
 
         return ResponseEntity.status(HttpStatus.OK).body(returnValue);
