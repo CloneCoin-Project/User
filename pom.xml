@@ -10,7 +10,8 @@
 	</parent>
 	<groupId>com.cloneCoin</groupId>
 	<artifactId>user</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+<!--	<version>0.0.1-SNAPSHOT</version>-->
+	<version>1.0</version>
 	<name>user</name>
 	<description>Demo project for MSA</description>
 	<properties>
