@@ -22,5 +22,9 @@ public class UserEntity {
     private String role;
     @Column(nullable = false, unique = true)
     private String encryptedPassword;
+    @Column(unique = true)
+    private String apiKey;
+    @Column(unique = true)
+    private String secretKey;
 
 }

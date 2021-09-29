@@ -12,6 +12,8 @@ public class UserDto {
     private String password;
     private String name;
     private String role;
+    private String apiKey;
+    private String secretKey;
 
     private Date createdAt;
 
