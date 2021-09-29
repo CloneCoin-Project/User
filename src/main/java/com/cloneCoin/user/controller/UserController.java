@@ -6,22 +6,22 @@ import com.cloneCoin.user.dto.UserDto;
 import com.cloneCoin.user.service.UserService;
 import com.cloneCoin.user.vo.Greeting;
 import com.cloneCoin.user.vo.ResponseUser;
+import com.cloneCoin.user.vo.UserBasicFormForApi;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.annotation.Repeatable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
 
 @RestController
-@RequestMapping("/user/")
+@RequestMapping("/")
 public class UserController {
     private Environment env;
     private UserService userService;
@@ -57,8 +57,8 @@ public class UserController {
     }
 
     @GetMapping("/users/{userId}")
-    public ResponseEntity<ResponseUser> getUser(@PathVariable("userId") String userId) {
-        UserDto userDto = userService.getUserByUserId(userId);
+    public ResponseEntity<ResponseUser> getUser(@PathVariable("userId") Long id) {
+        UserDto userDto = userService.getUserById(id);
         ResponseUser returnValue = new ModelMapper().map(userDto, ResponseUser.class);
 
         return ResponseEntity.status(HttpStatus.OK).body(returnValue);
@@ -77,6 +77,25 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseUser); // 201 success
     }
 
-//    @PostMapping("/login")
-//    public
+    @PostMapping("/leader")
+    public ResponseEntity<ResponseUser> applyLeader(@RequestBody UserBasicFormForApi userBasicFormForApi) {
+        ModelMapper mapper = new ModelMapper();
+
+        UserDto userDto = userService.applyLeader(userBasicFormForApi);
+
+        ResponseUser responseUser = mapper.map(userDto, ResponseUser.class);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseUser);
+    }
+
+    @DeleteMapping("/leader/{userId}")
+    public ResponseEntity<ResponseUser> quitLeader(@PathVariable("userId") Long id) {
+        ModelMapper mapper = new ModelMapper();
+
+        UserDto userDto = userService.quitLeader(id);
+
+        ResponseUser responseUser = mapper.map(userDto, ResponseUser.class);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseUser);
+    }
 }

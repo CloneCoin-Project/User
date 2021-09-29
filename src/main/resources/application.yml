@@ -1,9 +1,19 @@
 server:
   port: 0 # Random Port : 0
 
+eureka:
+  instance:
+    instance-id : ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka # -e
+
 spring:
   application:
-    name: user-server
+    name: user
   h2:
     console:
       enabled: true
@@ -13,19 +23,18 @@ spring:
   datasource:
     dirver-class-name: org.h2.Driver
     url: jdbc:h2:mem:testdb
-    # username : sa
-    # password : 1234
-
-eureka:
-  instance:
-    hostname: localhost
-    instance-id : ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
-
-  client:
-    registerWithEureka: true #gateway는 eureka에 등록할필요 없다. gateway는
-    fetchRegistry: true #gateway는 eureka가 찾을 필요 없다
-    serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:8761/eureka/ # 서버가 가진 위치값
+#    url: jdbc:mariadb://localhost:3306/mydb
+#    dirver-class-name: org.mariadb.jdbc.Driver
+#    username : root
+#    password : 1015
 
 greeting:
   message: Welcome to the CloneCoin Project.
+
+token:
+  expiration_time: 86400000 #1 day
+  secret: user_token
+
+#loggin:
+#  level:
+#    com.clonecoin.user: DEBUG

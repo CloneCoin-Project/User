@@ -12,15 +12,19 @@ public class UserEntity {
     @GeneratedValue
     private Long id;
 
+    @Column(nullable = false, unique = true)
+    private String username;
     @Column(nullable = false, length=50, unique = true)
     private String email;
-    @Column(nullable = false)
+    @Column( nullable = false)
     private String name;
-    @Column(nullable = false, unique = true)
-    private String userId;
     @Column(nullable = false)
     private String role;
     @Column(nullable = false, unique = true)
     private String encryptedPassword;
+    @Column(unique = true)
+    private String apiKey;
+    @Column(unique = true)
+    private String secretKey;
 
 }
