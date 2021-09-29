@@ -3,7 +3,7 @@ package com.cloneCoin.user.kafka.event;
 import lombok.Data;
 
 @Data
-public class LeaderApplyEvent {
+public class LeaderEvent {
 
     private String eventName;
 

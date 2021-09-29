@@ -4,7 +4,9 @@ import com.cloneCoin.user.kafka.KafkaProducer;
 import com.cloneCoin.user.dto.UserDto;
 import com.cloneCoin.user.jpa.UserEntity;
 import com.cloneCoin.user.jpa.UserRepository;
+import com.cloneCoin.user.kafka.event.LeaderEvent;
 import com.cloneCoin.user.service.UserService;
+import com.cloneCoin.user.vo.UserBasicFormForApi;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -62,8 +64,8 @@ public class UserServiceImpl implements UserService {
         UserDto newUser = mapper.map(userEntity, UserDto.class);
 
         // kafka 로 user created 생성 produce 작업 필요
-        kafkaProducer.send("quickstart-events", newUser);
-        log.info("message sent by userServiceImpl" );
+        kafkaProducer.send("user-topic", newUser);
+        log.info("message sent by createUser : {}", newUser);
 
         return newUser;
     }
@@ -110,5 +112,55 @@ public class UserServiceImpl implements UserService {
 
         UserDto userDto = new ModelMapper().map(userEntity, UserDto.class);
         return userDto;
+    }
+
+    @Override
+    public UserDto applyLeader(UserBasicFormForApi userform) {
+
+        Optional<UserEntity> userEntity = userRepository.findById(userform.getUserId());
+
+        if (userEntity == null)
+            throw new UsernameNotFoundException("user not found");
+
+        UserEntity user = userEntity.get();
+        user.setRole("leader");
+        user.setSecretKey(userform.getSecretKey());
+        user.setApiKey(userform.getApiKey());
+        userRepository.save(user);
+
+        ModelMapper mapper = new ModelMapper();
+        UserDto updatedUser = mapper.map(user, UserDto.class);
+
+        LeaderEvent leaderEvent = mapper.map(user, LeaderEvent.class);
+        leaderEvent.setEventName("LeaderApplyEvent");
+
+        kafkaProducer.send("user-topic", leaderEvent);
+        log.info("message sent by applyLeader : {}", leaderEvent);
+        return updatedUser;
+    }
+
+    @Override
+    public UserDto quitLeader(Long id) {
+
+        Optional<UserEntity> userEntity = userRepository.findById(id);
+
+        if (userEntity == null)
+            throw new UsernameNotFoundException("user not found");
+
+        UserEntity user = userEntity.get();
+        user.setRole("normal");
+        user.setSecretKey(null);
+        user.setApiKey(null);
+        userRepository.save(user);
+
+        ModelMapper mapper = new ModelMapper();
+        UserDto updatedUser = mapper.map(user, UserDto.class);
+
+        LeaderEvent leaderEvent = mapper.map(user, LeaderEvent.class);
+        leaderEvent.setEventName("LeaderQuitEvent");
+
+        kafkaProducer.send("user-topic", leaderEvent);
+        log.info("message sent by applyLeader : {}", leaderEvent);
+        return updatedUser;
     }
 }
