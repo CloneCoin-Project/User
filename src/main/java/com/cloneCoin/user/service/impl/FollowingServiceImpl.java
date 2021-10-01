@@ -36,6 +36,9 @@ public class FollowingServiceImpl implements FollowingService {
 
         followingEntity.setUserName(user.getName());
         followingEntity.setLeaderName(leader.getName());
+
+        // 리더 검증 로직 추가 필요
+
         FollowingEntity newFollowing = followingRepository.save(followingEntity);
 
         log.info("follwing created : {}", newFollowing);
@@ -49,8 +52,17 @@ public class FollowingServiceImpl implements FollowingService {
         ModelMapper mapper = new ModelMapper();
 
         List<FollowingDto> followingDtoList = Arrays.asList(mapper.map(followingEntities, FollowingDto[].class));
-//        java.lang.reflect.Type follwingListType = new TypeToken<List<FollowingDto>>(){}.getType();
-//        Iterable<FollowingDto> followingDtos = mapper.map(followingEntities, follwingListType);
+        log.info("getFollowingsByUserId : {} ", followingDtoList);
+        return followingDtoList;
+    }
+
+    @Override
+    public Iterable<FollowingDto> getFollowersByLeaderId(Long leaderId) {
+        Iterable<FollowingEntity> followingEntities =  followingRepository.findAllByLeaderId(leaderId);
+
+        ModelMapper mapper = new ModelMapper();
+
+        List<FollowingDto> followingDtoList = Arrays.asList(mapper.map(followingEntities, FollowingDto[].class));
         log.info("getFollowingsByUserId : {} ", followingDtoList);
         return followingDtoList;
     }

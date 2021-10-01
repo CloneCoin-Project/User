@@ -25,9 +25,19 @@ public class FollowingController {
         this.followingService = followingService;
     }
 
-    @GetMapping("/follow/{userId}")
-    public ResponseEntity<Iterable<ResponseFollowing>> getFollowingsByUserId(@PathVariable Long userId) {
+    @GetMapping("/followings")
+    public ResponseEntity<Iterable<ResponseFollowing>> getFollowingsByUserId(@RequestParam Long userId) {
         Iterable<FollowingDto> followingDtoList = followingService.getFollowingsByUserId(userId);
+
+        ModelMapper mapper = new ModelMapper();
+        List<ResponseFollowing> responseFollowings = Arrays.asList(mapper.map(followingDtoList, ResponseFollowing[].class));
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseFollowings);
+    }
+
+    @GetMapping("/followers")
+    public ResponseEntity<Iterable<ResponseFollowing>> getFollowersByLeaderId(@RequestParam Long leaderId) {
+        Iterable<FollowingDto> followingDtoList = followingService.getFollowersByLeaderId(leaderId);
 
         ModelMapper mapper = new ModelMapper();
         List<ResponseFollowing> responseFollowings = Arrays.asList(mapper.map(followingDtoList, ResponseFollowing[].class));
@@ -42,6 +52,7 @@ public class FollowingController {
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
         FollowingDto followingDto = mapper.map(requestFollowing, FollowingDto.class);
 
+        // leader 인지 검증작업 필요.
         FollowingDto newFollowing = followingService.createFollowing(followingDto);
 
         ResponseFollowing responseFollowing = mapper.map(newFollowing, ResponseFollowing.class);

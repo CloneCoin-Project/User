@@ -10,7 +10,6 @@ import com.cloneCoin.user.service.UserService;
 import com.cloneCoin.user.vo.UserBasicFormForApi;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.PropertyMap;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -125,6 +124,9 @@ public class UserServiceImpl implements UserService {
 
         if (userEntity == null)
             throw new UsernameNotFoundException("user not found");
+
+        if (userEntity.get().getRole() == "leader")
+            throw new UsernameNotFoundException("user is already leader");
 
         UserEntity user = userEntity.get();
         user.setRole("leader");
