@@ -8,8 +8,11 @@ import com.cloneCoin.user.jpa.UserRepository;
 import com.cloneCoin.user.service.FollowingService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -37,5 +40,18 @@ public class FollowingServiceImpl implements FollowingService {
 
         log.info("follwing created : {}", newFollowing);
         return mapper.map(newFollowing, FollowingDto.class);
+    }
+
+    @Override
+    public Iterable<FollowingDto> getFollowingsByUserId(Long userId) {
+        Iterable<FollowingEntity> followingEntities =  followingRepository.findAllByUserId(userId);
+
+        ModelMapper mapper = new ModelMapper();
+
+        List<FollowingDto> followingDtoList = Arrays.asList(mapper.map(followingEntities, FollowingDto[].class));
+//        java.lang.reflect.Type follwingListType = new TypeToken<List<FollowingDto>>(){}.getType();
+//        Iterable<FollowingDto> followingDtos = mapper.map(followingEntities, follwingListType);
+        log.info("getFollowingsByUserId : {} ", followingDtoList);
+        return followingDtoList;
     }
 }
