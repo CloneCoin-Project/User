@@ -10,6 +10,7 @@ import com.cloneCoin.user.service.UserService;
 import com.cloneCoin.user.vo.UserBasicFormForApi;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -62,11 +63,13 @@ public class UserServiceImpl implements UserService {
         userRepository.save(userEntity);
 
         UserDto newUser = mapper.map(userEntity, UserDto.class);
-        UserCreateMsg userCreateMsg = mapper.map(newUser, UserCreateMsg.class);
+
+        UserCreateMsg userCreateMsg = new UserCreateMsg();
+        userCreateMsg.setUserId(userEntity.getId());
 
         // kafka 로 user created 생성 produce 작업 필요
-        kafkaProducer.send("user-create-topic", newUser);
-        log.info("message sent by createUser : {}", newUser);
+        kafkaProducer.send("user-create-topic", userCreateMsg);
+        log.info("message sent by createUser : {}", userCreateMsg);
 
         return newUser;
     }
@@ -135,6 +138,7 @@ public class UserServiceImpl implements UserService {
         LeaderApplyEventMsg leaderApplyEventMsg = mapper.map(user, LeaderApplyEventMsg.class);
 //        leaderApplyEvent.setEventName("LeaderApplyEvent");
         leaderApplyEventMsg.setLeaderId(user.getId());
+        leaderApplyEventMsg.setLeaderName(user.getUsername());
         kafkaProducer.send("user-leader-apply-topic", leaderApplyEventMsg);
         log.info("message sent by applyLeader : {}", leaderApplyEventMsg);
         return updatedUser;
