@@ -4,7 +4,8 @@ import com.cloneCoin.user.kafka.KafkaProducer;
 import com.cloneCoin.user.dto.UserDto;
 import com.cloneCoin.user.jpa.UserEntity;
 import com.cloneCoin.user.jpa.UserRepository;
-import com.cloneCoin.user.kafka.event.LeaderEvent;
+import com.cloneCoin.user.kafka.event.LeaderApplyEventMsg;
+import com.cloneCoin.user.kafka.event.UserCreateMsg;
 import com.cloneCoin.user.service.UserService;
 import com.cloneCoin.user.vo.UserBasicFormForApi;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,6 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     BCryptPasswordEncoder passwordEncoder;
     KafkaProducer kafkaProducer;
-
     Environment env;
 
     @Override
@@ -62,9 +62,10 @@ public class UserServiceImpl implements UserService {
         userRepository.save(userEntity);
 
         UserDto newUser = mapper.map(userEntity, UserDto.class);
+        UserCreateMsg userCreateMsg = mapper.map(newUser, UserCreateMsg.class);
 
         // kafka 로 user created 생성 produce 작업 필요
-        kafkaProducer.send("user-topic", newUser);
+        kafkaProducer.send("user-create-topic", newUser);
         log.info("message sent by createUser : {}", newUser);
 
         return newUser;
@@ -131,11 +132,11 @@ public class UserServiceImpl implements UserService {
         ModelMapper mapper = new ModelMapper();
         UserDto updatedUser = mapper.map(user, UserDto.class);
 
-        LeaderEvent leaderEvent = mapper.map(user, LeaderEvent.class);
-        leaderEvent.setEventName("LeaderApplyEvent");
-
-        kafkaProducer.send("user-topic", leaderEvent);
-        log.info("message sent by applyLeader : {}", leaderEvent);
+        LeaderApplyEventMsg leaderApplyEventMsg = mapper.map(user, LeaderApplyEventMsg.class);
+//        leaderApplyEvent.setEventName("LeaderApplyEvent");
+        leaderApplyEventMsg.setLeaderId(user.getId());
+        kafkaProducer.send("user-leader-apply-topic", leaderApplyEventMsg);
+        log.info("message sent by applyLeader : {}", leaderApplyEventMsg);
         return updatedUser;
     }
 
@@ -156,11 +157,11 @@ public class UserServiceImpl implements UserService {
         ModelMapper mapper = new ModelMapper();
         UserDto updatedUser = mapper.map(user, UserDto.class);
 
-        LeaderEvent leaderEvent = mapper.map(user, LeaderEvent.class);
-        leaderEvent.setEventName("LeaderQuitEvent");
+        LeaderApplyEventMsg leaderApplyEventMsg = mapper.map(user, LeaderApplyEventMsg.class);
+//        leaderApplyEventMsg.setEventName("LeaderQuitEvent");
 
-        kafkaProducer.send("user-topic", leaderEvent);
-        log.info("message sent by applyLeader : {}", leaderEvent);
+        kafkaProducer.send("user-leader-apply-topic", leaderApplyEventMsg);
+        log.info("message sent by applyLeader : {}", leaderApplyEventMsg);
         return updatedUser;
     }
 }

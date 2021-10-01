@@ -1,7 +1,7 @@
 package com.cloneCoin.user.kafka;
 
 import com.cloneCoin.user.dto.UserDto;
-import com.cloneCoin.user.kafka.event.LeaderEvent;
+import com.cloneCoin.user.kafka.event.LeaderApplyEventMsg;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -35,19 +35,19 @@ public class KafkaProducer {
         return userDto;
     }
 
-    public LeaderEvent send(String kafkaTopic, LeaderEvent leaderEvent) {
+    public LeaderApplyEventMsg send(String kafkaTopic, LeaderApplyEventMsg leaderApplyEventMsg) {
         ObjectMapper mapper = new ObjectMapper();
         String jsonInString = "";
         try {
-            jsonInString = mapper.writeValueAsString(leaderEvent);
+            jsonInString = mapper.writeValueAsString(leaderApplyEventMsg);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
 
         kafkaTemplate.send(kafkaTopic, jsonInString);
-        log.info("kafka producer send data from the user server" + leaderEvent);
+        log.info("kafka producer send data from the user server" + leaderApplyEventMsg);
 
-        return leaderEvent;
+        return leaderApplyEventMsg;
     }
 
 }
