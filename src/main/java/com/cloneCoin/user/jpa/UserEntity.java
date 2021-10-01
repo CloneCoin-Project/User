@@ -27,4 +27,5 @@ public class UserEntity {
     @Column(unique = true)
     private String secretKey;
 
+
 }

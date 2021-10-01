@@ -10,12 +10,6 @@ import javax.validation.constraints.Size;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RequestLogin {
-
-//    @NotNull(message = "Email cannot be null")
-//    @Size(min = 2, message = "Email not be less than two characters")
-//    @Email
-//    private String email;
-
     @NotNull(message = "username cannot be null")
     private String username;
 
