@@ -140,9 +140,9 @@ public class UserServiceImpl implements UserService {
         LeaderApplyEventMsg leaderApplyEventMsg = mapper.map(user, LeaderApplyEventMsg.class);
 //        leaderApplyEvent.setEventName("LeaderApplyEvent");
         leaderApplyEventMsg.setLeaderId(user.getId());
-//        leaderApplyEventMsg.setLeaderName(user.getUsername());
+        leaderApplyEventMsg.setLeaderName(user.getUsername());
 //        kafkaProducer.send("user-leader-apply-topic", leaderApplyEventMsg);
-        kafkaProducer.send("user-topic", leaderApplyEventMsg);
+        kafkaProducer.send("user-leader-apply-topic", leaderApplyEventMsg);
 
         log.info("message sent by applyLeader : {}", leaderApplyEventMsg);
         return updatedUser;
