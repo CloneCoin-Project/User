@@ -24,7 +24,9 @@ public class FollowingValidation {
 
         Optional<FollowingEntity> relationship = followingRepository.findByUserIdAndLeaderId(userId, leaderId);
 
-        if(relationship != null) {
+        log.info("hasFollowingRelastionship : {}", relationship);
+
+        if(!relationship.isEmpty()) {
             return "이미 팔로잉한 리더입니다.";
         }
 
@@ -35,6 +37,7 @@ public class FollowingValidation {
 
         Optional<UserEntity> user = userRepository.findById(leaderId);
 
+        log.info("isLeader : {}" , user);
         if(user == null) {
             return "해당 사용자가 존재하지 않습니다.";
         }

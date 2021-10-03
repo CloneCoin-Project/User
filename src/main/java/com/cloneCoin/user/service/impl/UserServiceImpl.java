@@ -77,11 +77,13 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserById(Long id) {
         Optional<UserEntity> userEntity = userRepository.findById(id);
 
-        if(userEntity == null) {
+        if(userEntity.isEmpty()) {
             throw new UsernameNotFoundException("user not found");
         }
 
-        UserDto userDto = new ModelMapper().map(userEntity, UserDto.class);
+        log.info("getUserById userEntity : {}", userEntity);
+
+        UserDto userDto = new ModelMapper().map(userEntity.get(), UserDto.class);
 
         return userDto;
     }
@@ -122,9 +124,12 @@ public class UserServiceImpl implements UserService {
 
         Optional<UserEntity> userEntity = userRepository.findById(userform.getUserId());
 
+        log.info("applyLeader userEntity: {}", userEntity);
+
         if (userEntity == null)
             throw new UsernameNotFoundException("user not found");
 
+        log.info("applyLeader userEntity: {}", userEntity.get());
         if (userEntity.get().getRole() == "leader")
             throw new UsernameNotFoundException("user is already leader");
 
@@ -140,9 +145,9 @@ public class UserServiceImpl implements UserService {
         LeaderApplyEventMsg leaderApplyEventMsg = mapper.map(user, LeaderApplyEventMsg.class);
 //        leaderApplyEvent.setEventName("LeaderApplyEvent");
         leaderApplyEventMsg.setLeaderId(user.getId());
-//        leaderApplyEventMsg.setLeaderName(user.getUsername());
+        leaderApplyEventMsg.setLeaderName(user.getUsername());
 //        kafkaProducer.send("user-leader-apply-topic", leaderApplyEventMsg);
-        kafkaProducer.send("user-topic", leaderApplyEventMsg);
+        kafkaProducer.send("user-leader-apply-topic", leaderApplyEventMsg);
 
         log.info("message sent by applyLeader : {}", leaderApplyEventMsg);
         return updatedUser;

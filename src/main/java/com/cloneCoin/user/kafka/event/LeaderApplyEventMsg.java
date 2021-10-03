@@ -9,7 +9,7 @@ public class LeaderApplyEventMsg {
 
     private Long leaderId;
 
-//    private String leaderName;
+    private String leaderName;
 
     private String apiKey;
 
