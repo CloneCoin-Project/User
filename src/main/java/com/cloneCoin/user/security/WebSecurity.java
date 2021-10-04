@@ -31,14 +31,14 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         // using-generated-password 사용해서 인증 할 수 있다.
         http.csrf().disable();
-        http.authorizeRequests().antMatchers("/**").permitAll();
+//        http.authorizeRequests().antMatchers("/**").permitAll();
 //        http.authorizeRequests().antMatchers("/actuator/**", "/welcome").permitAll();
-//        http.authorizeRequests()
-//                                .antMatchers("/**")
-//                                .hasIpAddress("172.30.1.23")
-//                                .permitAll()
-//                                .and()
-//                                .addFilter(getAuthenticationFilter());
+        http.authorizeRequests()
+                                .antMatchers("/**")
+//                                .hasIpAddress("127.0.0.1/32")
+                                .permitAll()
+                                .and()
+                                .addFilter(getAuthenticationFilter());
 
         http.headers().frameOptions().disable(); // h2 console 접근 하려면 이거 선언해야됨.
     }
