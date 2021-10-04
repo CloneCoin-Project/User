@@ -1,3 +1,19 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+  application:
+    name: user
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
+      path: /h2-console
+  datasource:
+    dirver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb
+
 server:
   port: 8001 # Random Port : 0
 
@@ -11,7 +27,19 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka # -e
 
+greeting:
+  message: Welcome to the CloneCoin Project.
+
+token:
+  expiration_time: 86400000 #1 day
+  secret: user_token
+
+---
+
 spring:
+  config:
+    activate:
+      on-profile: dev
   application:
     name: user
   h2:
@@ -23,18 +51,36 @@ spring:
   datasource:
     dirver-class-name: org.h2.Driver
     url: jdbc:h2:mem:testdb
-#    url: jdbc:mariadb://localhost:3306/mydb
-#    dirver-class-name: org.mariadb.jdbc.Driver
-#    username : root
-#    password : 1015
 
-greeting:
-  message: Welcome to the CloneCoin Project.
+---
 
-token:
-  expiration_time: 86400000 #1 day
-  secret: user_token
+spring:
+  config:
+    activate:
+      on-profile: prod
+  application:
+    name: user
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
+      path: /h2-console
+  datasource:
+    dirver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb
 
-#loggin:
-#  level:
-#    com.clonecoin.user: DEBUG
+server:
+  port: 0 # Random Port : 0
+
+eureka:
+  instance:
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+    prefer-ip-address: true
+    ip-address: 3.38.42.25 # ec2 specific server public address
+
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://13.125.221.207:8761/eureka # ec2 eureka public address
