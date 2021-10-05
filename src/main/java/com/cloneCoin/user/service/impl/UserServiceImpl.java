@@ -7,6 +7,7 @@ import com.cloneCoin.user.jpa.UserRepository;
 import com.cloneCoin.user.kafka.event.LeaderApplyEventMsg;
 import com.cloneCoin.user.kafka.event.UserCreateMsg;
 import com.cloneCoin.user.service.UserService;
+import com.cloneCoin.user.vo.EditDescription;
 import com.cloneCoin.user.vo.UserBasicFormForApi;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -176,5 +177,19 @@ public class UserServiceImpl implements UserService {
         kafkaProducer.send("user-leader-apply-topic", leaderApplyEventMsg);
         log.info("message sent by applyLeader : {}", leaderApplyEventMsg);
         return updatedUser;
+    }
+
+    @Override
+    public EditDescription editDescription(EditDescription requestEditDescription) {
+        UserEntity userEntity = userRepository.findById(requestEditDescription.getUserId()).get();
+        userEntity.setDescription(requestEditDescription.getDescription());
+
+        UserEntity updatedUserEntity = userRepository.save(userEntity);
+
+        ModelMapper mapper = new ModelMapper();
+
+        EditDescription result = mapper.map(updatedUserEntity, EditDescription.class);
+        
+        return result;
     }
 }

@@ -83,7 +83,7 @@ public class FollowingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseFollowing); // 201 success
     }
 
-    @PostMapping("/unfollow")
+    @DeleteMapping("/follow")
     public ResponseEntity<Object> unfollowLeader(@RequestBody RequestFollowing requestFollowing) {
 
 //        Long userId = requestFollowing.getUserId();

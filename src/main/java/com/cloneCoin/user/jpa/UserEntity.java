@@ -20,6 +20,7 @@ public class UserEntity {
     private String name;
     @Column(nullable = false)
     private String role;
+    private String description;
     @Column(nullable = false, unique = true)
     private String encryptedPassword;
     @Column(unique = true)
