@@ -54,21 +54,21 @@ public class FollowingController {
     @PostMapping("/follow")
     public ResponseEntity<Object> followLeader(@RequestBody RequestFollowing requestFollowing) {
 
-        Long userId = requestFollowing.getUserId();
-        Long leaderId = requestFollowing.getLeaderId();
+//        Long userId = requestFollowing.getUserId();
+//        Long leaderId = requestFollowing.getLeaderId();
         // leader 인지 검증작업 필요.
 
-        String validationMsg = "";
+//        String validationMsg = "";
 
-        validationMsg = followingValidation.isLeader(leaderId);
-        if(validationMsg != "") {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(validationMsg);
-        }
-
-        validationMsg = followingValidation.hasFollowingRelationship(userId, leaderId);
-        if(validationMsg != "") {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(validationMsg);
-        }
+//        validationMsg = followingValidation.isLeader(leaderId);
+//        if(validationMsg != "") {
+//            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(validationMsg);
+//        }
+//
+//        validationMsg = followingValidation.hasFollowingRelationship(userId, leaderId);
+//        if(validationMsg != "") {
+//            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(validationMsg);
+//        }
 
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
@@ -78,7 +78,35 @@ public class FollowingController {
         FollowingDto newFollowing = followingService.createFollowing(followingDto);
 
         ResponseFollowing responseFollowing = mapper.map(newFollowing, ResponseFollowing.class);
+        responseFollowing.setType("follow");
+
         return ResponseEntity.status(HttpStatus.CREATED).body(responseFollowing); // 201 success
+    }
+
+    @PostMapping("/unfollow")
+    public ResponseEntity<Object> unfollowLeader(@RequestBody RequestFollowing requestFollowing) {
+
+//        Long userId = requestFollowing.getUserId();
+//        Long leaderId = requestFollowing.getLeaderId();
+        // leader 인지 검증작업 필요.
+
+//        String validationMsg = "";
+
+//        validationMsg = followingValidation.isLeader(leaderId);
+//        if(validationMsg != "") {
+//            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(validationMsg);
+//        }
+
+        ModelMapper mapper = new ModelMapper();
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        FollowingDto followingDto = mapper.map(requestFollowing, FollowingDto.class);
+
+
+        FollowingDto removedFollowing = followingService.removeFollowing(followingDto);
+
+        ResponseFollowing responseFollowing = mapper.map(removedFollowing, ResponseFollowing.class);
+        responseFollowing.setType("unfollow");
+        return ResponseEntity.status(HttpStatus.OK).body(responseFollowing); // 201 success
     }
 
 

@@ -10,4 +10,5 @@ public class ResponseFollowing {
     private String userName;
     private Long leaderId;
     private String leaderName;
+    private String type;
 }

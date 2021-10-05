@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface FollowingService {
     FollowingDto createFollowing(FollowingDto followingDto);
+    FollowingDto removeFollowing(FollowingDto followingDto);
     Iterable<FollowingDto> getFollowingsByUserId(Long userId);
     Iterable<FollowingDto> getFollowersByLeaderId(Long leaderId);
 }
