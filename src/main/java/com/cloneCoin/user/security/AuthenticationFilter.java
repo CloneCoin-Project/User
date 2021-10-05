@@ -3,10 +3,12 @@ package com.cloneCoin.user.security;
 import com.cloneCoin.user.dto.UserDto;
 import com.cloneCoin.user.service.UserService;
 import com.cloneCoin.user.vo.RequestLogin;
+import com.cloneCoin.user.vo.ResponseUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -61,7 +64,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                                             Authentication authResult) throws IOException, ServletException {
         log.info("SuccessfulAuthentication : {}", authResult);
         String userName = ((User)authResult.getPrincipal()).getUsername();
-//        UserDto userDetails = userService.getUserDetailsByEmail(userName);
         UserDto userDetails = userService.getUserDetailsByUsername(userName);
 
         String token = Jwts.builder()
@@ -72,8 +74,18 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                 .compact();
 
         response.addHeader("token", token);
-//        response.addHeader("email", userDetails.getEmail());
         response.addHeader("username", userDetails.getUsername());
+
+        Cookie jwtCookie = new Cookie("token", token);
+        response.addCookie(jwtCookie);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ModelMapper modelMapper = new ModelMapper();
+
+        String jsonUser = objectMapper.writeValueAsString(modelMapper.map(userDetails, ResponseUser.class));
+        response.getWriter().write(jsonUser);
     }
 
 
