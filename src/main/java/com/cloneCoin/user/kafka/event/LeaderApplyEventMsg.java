@@ -3,11 +3,11 @@ package com.cloneCoin.user.kafka.event;
 import lombok.Data;
 
 @Data
-public class LeaderEvent {
+public class LeaderApplyEventMsg {
 
-    private String eventName;
+    private Long leaderId;
 
-    private Long userId;
+    private String leaderName;
 
     private String apiKey;
 

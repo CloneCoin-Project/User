@@ -32,11 +32,11 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         // using-generated-password 사용해서 인증 할 수 있다.
         http.csrf().disable();
 //        http.authorizeRequests().antMatchers("/**").permitAll();
-        http.authorizeRequests().antMatchers("/actuator/**", "/welcome").permitAll();
+//        http.authorizeRequests().antMatchers("/actuator/**", "/welcome").permitAll();
         http.authorizeRequests()
                                 .antMatchers("/**")
-                                .hasIpAddress("172.30.1.23")
-//                                .permitAll()
+//                                .hasIpAddress("127.0.0.1/32")
+                                .permitAll()
                                 .and()
                                 .addFilter(getAuthenticationFilter());
 

@@ -1,7 +1,9 @@
 package com.cloneCoin.user.kafka;
 
 import com.cloneCoin.user.dto.UserDto;
-import com.cloneCoin.user.kafka.event.LeaderEvent;
+import com.cloneCoin.user.kafka.event.FollowEventMsg;
+import com.cloneCoin.user.kafka.event.LeaderApplyEventMsg;
+import com.cloneCoin.user.kafka.event.UserCreateMsg;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -20,34 +22,49 @@ public class KafkaProducer {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public UserDto send(String kafkaTopic, UserDto userDto) {
+    public UserCreateMsg send(String kafkaTopic, UserCreateMsg userCreateMsg) {
         ObjectMapper mapper = new ObjectMapper();
         String jsonInString = "";
         try {
-            jsonInString = mapper.writeValueAsString(userDto);
+            jsonInString = mapper.writeValueAsString(userCreateMsg);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
 
         kafkaTemplate.send(kafkaTopic, jsonInString);
-        log.info("kafka producer send data from the user server" + userDto);
+        log.info("kafka producer send data from the user server" + userCreateMsg);
 
-        return userDto;
+        return userCreateMsg;
     }
 
-    public LeaderEvent send(String kafkaTopic, LeaderEvent leaderEvent) {
+    public LeaderApplyEventMsg send(String kafkaTopic, LeaderApplyEventMsg leaderApplyEventMsg) {
         ObjectMapper mapper = new ObjectMapper();
         String jsonInString = "";
         try {
-            jsonInString = mapper.writeValueAsString(leaderEvent);
+            jsonInString = mapper.writeValueAsString(leaderApplyEventMsg);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
 
         kafkaTemplate.send(kafkaTopic, jsonInString);
-        log.info("kafka producer send data from the user server" + leaderEvent);
+        log.info("kafka producer send data from the user server" + leaderApplyEventMsg);
 
-        return leaderEvent;
+        return leaderApplyEventMsg;
+    }
+
+    public FollowEventMsg send(String kafkaTopic, FollowEventMsg followEventMsg) {
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonInString = "";
+        try {
+            jsonInString = mapper.writeValueAsString(followEventMsg);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        kafkaTemplate.send(kafkaTopic, jsonInString);
+        log.info("kafka producer send data from the user server" + followEventMsg);
+
+        return followEventMsg;
     }
 
 }

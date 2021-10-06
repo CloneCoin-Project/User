@@ -2,6 +2,7 @@ package com.cloneCoin.user.service;
 
 import com.cloneCoin.user.dto.UserDto;
 import com.cloneCoin.user.jpa.UserEntity;
+import com.cloneCoin.user.vo.EditDescription;
 import com.cloneCoin.user.vo.UserBasicFormForApi;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,4 +19,6 @@ public interface UserService extends UserDetailsService {
     UserDto applyLeader(UserBasicFormForApi userform);
 
     UserDto quitLeader(Long id);
+
+    EditDescription editDescription(EditDescription requestEditDescription);
 }

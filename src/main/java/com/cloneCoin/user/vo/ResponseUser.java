@@ -11,6 +11,7 @@ public class ResponseUser {
     private String email;
     private String name;
     private String role;
+    private String description;
     private String apiKey;
     private String secretKey;
 }

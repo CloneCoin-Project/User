@@ -1,12 +1,9 @@
 package com.cloneCoin.user.controller;
 
 import com.cloneCoin.user.jpa.UserEntity;
-import com.cloneCoin.user.vo.RequestUser;
+import com.cloneCoin.user.vo.*;
 import com.cloneCoin.user.dto.UserDto;
 import com.cloneCoin.user.service.UserService;
-import com.cloneCoin.user.vo.Greeting;
-import com.cloneCoin.user.vo.ResponseUser;
-import com.cloneCoin.user.vo.UserBasicFormForApi;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.lang.annotation.Repeatable;
 import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/user")
 public class UserController {
     private Environment env;
     private UserService userService;
@@ -70,9 +66,9 @@ public class UserController {
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         UserDto userDto = mapper.map(user, UserDto.class);
-        userService.createUser(userDto);
+        UserDto newUser = userService.createUser(userDto);
 
-        ResponseUser responseUser = mapper.map(userDto, ResponseUser.class);
+        ResponseUser responseUser = mapper.map(newUser, ResponseUser.class);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseUser); // 201 success
     }
@@ -97,5 +93,13 @@ public class UserController {
         ResponseUser responseUser = mapper.map(userDto, ResponseUser.class);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseUser);
+    }
+
+    @PostMapping("description")
+    public ResponseEntity<EditDescription> editDescription(@RequestBody EditDescription requestEditDescription) {
+
+        EditDescription editDescription = userService.editDescription(requestEditDescription);
+
+        return ResponseEntity.status(HttpStatus.OK).body(editDescription);
     }
 }

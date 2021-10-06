@@ -4,8 +4,10 @@ import com.cloneCoin.user.kafka.KafkaProducer;
 import com.cloneCoin.user.dto.UserDto;
 import com.cloneCoin.user.jpa.UserEntity;
 import com.cloneCoin.user.jpa.UserRepository;
-import com.cloneCoin.user.kafka.event.LeaderEvent;
+import com.cloneCoin.user.kafka.event.LeaderApplyEventMsg;
+import com.cloneCoin.user.kafka.event.UserCreateMsg;
 import com.cloneCoin.user.service.UserService;
+import com.cloneCoin.user.vo.EditDescription;
 import com.cloneCoin.user.vo.UserBasicFormForApi;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -27,7 +29,6 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     BCryptPasswordEncoder passwordEncoder;
     KafkaProducer kafkaProducer;
-
     Environment env;
 
     @Override
@@ -63,9 +64,12 @@ public class UserServiceImpl implements UserService {
 
         UserDto newUser = mapper.map(userEntity, UserDto.class);
 
+        UserCreateMsg userCreateMsg = new UserCreateMsg();
+        userCreateMsg.setUserId(userEntity.getId());
+
         // kafka 로 user created 생성 produce 작업 필요
-        kafkaProducer.send("user-topic", newUser);
-        log.info("message sent by createUser : {}", newUser);
+        kafkaProducer.send("user-create-topic", userCreateMsg);
+        log.info("message sent by createUser : {}", userCreateMsg);
 
         return newUser;
     }
@@ -74,11 +78,13 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserById(Long id) {
         Optional<UserEntity> userEntity = userRepository.findById(id);
 
-        if(userEntity == null) {
+        if(userEntity.isEmpty()) {
             throw new UsernameNotFoundException("user not found");
         }
 
-        UserDto userDto = new ModelMapper().map(userEntity, UserDto.class);
+        log.info("getUserById userEntity : {}", userEntity);
+
+        UserDto userDto = new ModelMapper().map(userEntity.get(), UserDto.class);
 
         return userDto;
     }
@@ -119,8 +125,14 @@ public class UserServiceImpl implements UserService {
 
         Optional<UserEntity> userEntity = userRepository.findById(userform.getUserId());
 
+        log.info("applyLeader userEntity: {}", userEntity);
+
         if (userEntity == null)
             throw new UsernameNotFoundException("user not found");
+
+        log.info("applyLeader userEntity: {}", userEntity.get());
+        if (userEntity.get().getRole() == "leader")
+            throw new UsernameNotFoundException("user is already leader");
 
         UserEntity user = userEntity.get();
         user.setRole("leader");
@@ -131,11 +143,14 @@ public class UserServiceImpl implements UserService {
         ModelMapper mapper = new ModelMapper();
         UserDto updatedUser = mapper.map(user, UserDto.class);
 
-        LeaderEvent leaderEvent = mapper.map(user, LeaderEvent.class);
-        leaderEvent.setEventName("LeaderApplyEvent");
+        LeaderApplyEventMsg leaderApplyEventMsg = mapper.map(user, LeaderApplyEventMsg.class);
+//        leaderApplyEvent.setEventName("LeaderApplyEvent");
+        leaderApplyEventMsg.setLeaderId(user.getId());
+        leaderApplyEventMsg.setLeaderName(user.getUsername());
+//        kafkaProducer.send("user-leader-apply-topic", leaderApplyEventMsg);
+        kafkaProducer.send("user-leader-apply-topic", leaderApplyEventMsg);
 
-        kafkaProducer.send("user-topic", leaderEvent);
-        log.info("message sent by applyLeader : {}", leaderEvent);
+        log.info("message sent by applyLeader : {}", leaderApplyEventMsg);
         return updatedUser;
     }
 
@@ -156,11 +171,25 @@ public class UserServiceImpl implements UserService {
         ModelMapper mapper = new ModelMapper();
         UserDto updatedUser = mapper.map(user, UserDto.class);
 
-        LeaderEvent leaderEvent = mapper.map(user, LeaderEvent.class);
-        leaderEvent.setEventName("LeaderQuitEvent");
+        LeaderApplyEventMsg leaderApplyEventMsg = mapper.map(user, LeaderApplyEventMsg.class);
+//        leaderApplyEventMsg.setEventName("LeaderQuitEvent");
 
-        kafkaProducer.send("user-topic", leaderEvent);
-        log.info("message sent by applyLeader : {}", leaderEvent);
+        kafkaProducer.send("user-leader-apply-topic", leaderApplyEventMsg);
+        log.info("message sent by applyLeader : {}", leaderApplyEventMsg);
         return updatedUser;
+    }
+
+    @Override
+    public EditDescription editDescription(EditDescription requestEditDescription) {
+        UserEntity userEntity = userRepository.findById(requestEditDescription.getUserId()).get();
+        userEntity.setDescription(requestEditDescription.getDescription());
+
+        UserEntity updatedUserEntity = userRepository.save(userEntity);
+
+        ModelMapper mapper = new ModelMapper();
+
+        EditDescription result = mapper.map(updatedUserEntity, EditDescription.class);
+        
+        return result;
     }
 }
