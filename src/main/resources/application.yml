@@ -106,3 +106,41 @@ eureka:
     fetchRegistry: true
     serviceUrl:
       defaultZone: http://13.125.221.207:8761/eureka # ec2 eureka public address
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: prod2
+  application:
+    name: user
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    open-in-view: false
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://clonecoin-user-db.crtppt0lvgk7.ap-northeast-2.rds.amazonaws.com:3306/user?serverTimezone=UTC&characterEncoding=UTF-8
+    username: clonecoin
+    password: clonecoin
+
+server:
+  port: 8011 # replica
+
+eureka:
+  instance:
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${server.port}}
+    prefer-ip-address: true
+    ip-address: 3.38.42.25 # ec2 specific server public address(user)
+
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://13.125.221.207:8761/eureka # ec2 eureka public address
