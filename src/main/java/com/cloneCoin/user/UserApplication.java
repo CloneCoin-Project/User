@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootApplication
 @EnableDiscoveryClient
 public class UserApplication {
+
 	public static void main(String[] args) {
 		SpringApplication.run(UserApplication.class, args);
 	}
